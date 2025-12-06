@@ -1,4 +1,4 @@
-**Self-Healing Process Guard (Bash**
+**Self-Healing Process Guard (Bash)**
 
 Small, production-minded Bash watchdog that monitors an application and automatically restarts it if it stops. Ideal for learning Linux automation, process supervision, and logging.
 
@@ -8,7 +8,8 @@ Kill the app → process guard detects crash → restarts the app within a few s
 
 ![process_guard_terminal](https://github.com/user-attachments/assets/60b38136-b2ca-40a0-b3c2-e3adf8a8c180)
 
-![process_guard_terminal](https://github.com/user-attachments/assets/60b38136-b2ca-40a0-b3c2-e3adf8a8c180)
+![logs](https://github.com/user-attachments/assets/5c084ea4-ada0-40e5-aae9-a8c967cd5fb3)
+
 
 **Features**
 
@@ -34,6 +35,7 @@ done
 4. Start the guard (background):
 
 nohup /bin/bash ./process_guard.sh >/dev/null 2>&1 &
+![background jobs](https://github.com/user-attachments/assets/03d3270d-f6a0-4b46-b45b-5b6a317fd95f)
 
 5. Verify logs:
 
