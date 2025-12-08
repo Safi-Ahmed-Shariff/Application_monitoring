@@ -1,0 +1,14 @@
+#this is a service file, create this file inside /etc/systemd/system
+#afer the script is saved run systemctl commands to enable and start this service
+[Unit]
+Description=Process Guard For Demo Application
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/bash /home/safi/cloud/practice/app/process_guard.sh
+Restart=always
+RestartSec=5
+User=safi
+
+[Install]
+WantedBy=multi-user.target
