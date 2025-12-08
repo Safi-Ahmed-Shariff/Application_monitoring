@@ -66,4 +66,4 @@ Open crontab with crontab -e and add:
 · Consider adding shellcheck linting for robustness: sudo apt install shellcheck then shellcheck process_guard.sh.  
 
 **Contact**  
-Author: Safi Ahmed Shariff — add your [LinkedIn](https://www.linkedin.com/in/safi-ahmed-shariff-b03499264) link here.
+Author: Safi Ahmed Shariff — [LinkedIn](https://www.linkedin.com/in/safi-ahmed-shariff-b03499264)
