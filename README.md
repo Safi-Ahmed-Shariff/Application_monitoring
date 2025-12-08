@@ -1,30 +1,55 @@
-# **Self-Healing Process Guard (Bash)**
+# **Self-Healing Process Guard (Bash + systemd)**
 
-Small, production-minded Bash watchdog that monitors an application and automatically restarts it if it stops. Ideal for learning Linux automation, process supervision, and logging.
+A lightweight, production-minded Bash watchdog that monitors an application and **automatically restarts it if it stops or crashes**.  
+Ideal for learning **Linux automation, service supervision, systemd, logging, and resiliency engineering**.
 
-**Demo**
+---
 
-Kill the app → process guard detects crash → restarts the app within a few seconds → timestamped recovery log entry appended to guard.logs.
+## 🚀 **How It Works**
+1. Your application (`app.sh`) runs in the background.  
+2. `process_guard.sh` checks every 5 seconds using `pgrep -f`.  
+3. If the app dies → the guard restarts it instantly.  
+4. All events are logged with timestamps into `guard.logs`.  
+5. A systemd service (`process_guard.service`) can run this guard as a real Linux daemon.
 
+---
+
+## 📸 **Demo Screenshots**
+
+### **1️⃣ systemd service file**
 ![process_guard_terminal](https://github.com/user-attachments/assets/60b38136-b2ca-40a0-b3c2-e3adf8a8c180)
 
+### **2️⃣ Auto-Restart After Manual Kill**
 ![logs](https://github.com/user-attachments/assets/5c084ea4-ada0-40e5-aae9-a8c967cd5fb3)
 
+### **3️⃣ Service Status Output**
+![ststus](https://github.com/user-attachments/assets/eb2b523a-1802-41f2-b2bc-88d2ca86b40c)
 
-**Features**
 
-· Monitors application process with pgrep -f.  
-· Automatic restart using nohup bash <app> &.  
-· Timestamped recovery logs for auditing (guard.logs).  
-· Lightweight — pure Bash, no dependencies.  
-· Demonstrates Linux automation, logging, and resilience concepts  
+---
 
-**Quick setup / install (local test)**
+## ✨ **Features**
+- ✔ Monitors an application using `pgrep -f`  
+- ✔ Auto-restores the app using `nohup bash app.sh &`  
+- ✔ Timestamped logs for auditing (`guard.logs`)  
+- ✔ Lightweight — **pure Bash**, no dependencies  
+- ✔ systemd service support  
+- ✔ Demonstrates real DevOps/SRE concepts:
+  - self-healing  
+  - service supervision  
+  - logging & monitoring  
 
-1. Clone the repo and cd into it.
-2. Make scripts executable:
-  chmod +x process_guard.sh app.sh
-3. Create a simple demo app.sh if not present:
+
+---
+
+## ⚙️ **Quick Setup (Local Testing)**
+
+### **1. Clone the repo**  
+git clone https://github.com/Safi-Ahmed-Shariff/Application_monitoring.git  
+cd Application_monitoring  
+2. Make scripts executable:  
+  chmod +x process_guard.sh app.sh  
+3. Create a simple demo app.sh if not present:  
 
 #!/usr/bin/env bash  
 app.sh - demo app that runs until killed  
@@ -32,38 +57,76 @@ while true; do
   echo "App running at $(date)" >> /home/app_output.log  
   sleep 2  
 done  
-4. Start the guard (background):
+4. Start the guard (background):  
 
 nohup /bin/bash ./process_guard.sh >/dev/null 2>&1 &
 ![background jobs](https://github.com/user-attachments/assets/03d3270d-f6a0-4b46-b45b-5b6a317fd95f)
 
-5. Verify logs:
+5. Verify logs:  
 
-tail -f guard.logs
+tail -f guard.logs  
 
-6. Add to crontab so it starts on reboot  
-Open crontab with crontab -e and add:  
+## ⭐ **Running as a systemd Service (Recommended)**  
 
-@reboot nohup ./process_guard.sh >/dev/null 2>&1 &  
+Systemd gives production-grade behavior:  
+Starts on boot  
+Auto-restarts on failure  
+Log management via journalctl  
+Runs as a real Linux daemon  
+Service File (included in repository)  
+systemd/process_guard.service:  
 
-**How to demo the auto-heal**
+[Unit]  
+Description=Process Guard For Demo Application  
+After=network.target  
 
-1. Start guard.
-2. Confirm guard is running and app is running.
-3. Kill the demo app: pkill -f app.sh
-4. Watch guard.logs or service logs — you should see:
+[Service]  
+Type=simple  
+ExecStart=/usr/bin/bash /home/safi/cloud/practice/app/process_guard.sh  
+Restart=always  
+RestartSec=5  
+User=safi  
+StandardOutput=journal  
+StandardError=journal  
 
+[Install]  
+WantedBy=multi-user.target  
+
+## 🔧 **Update ExecStart path & username before installing.**
+
+Install the service  
+sudo cp systemd/process_guard.service /etc/systemd/system/  
+sudo systemctl daemon-reload  
+sudo systemctl start process_guard.service  
+sudo systemctl enable process_guard.service  
+
+Check status  
+systemctl status process_guard.service  
+
+View live logs  
+journalctl -u process_guard -f 
+
+## 🧪 **How to Demo the Auto-Heal**
+
+1. Start the process guard (via systemd or nohup)  
+2. Confirm both guard + app are running:   
+pgrep -af app.sh  
+pgrep -af process_guard.sh  
+3. Kill the demo app:  
+pkill -f app.sh  
+4. Watch logs:  
 [WARNING]: APPLICATION STOPPED  
 [INFO]: APPLICATION RESTARTING  
-[INFO]: RESTART SUCCESSFUL  
+[INFO]: RESTART SUCCESSFUL
+5. Check app output file again — it should be writing new timestamps.
 
-5. Verify the demo app output file is being appended to again.
-
-**Logs & troubleshooting**  
-· guard.logs contains timestamped events for audit: restarts, failures, run-state.  
-· If restart fails, check file permissions, environment, and executable path.  
-· Use pgrep -af to see running processes and confirm the app.sh start command is correct.  
-· Consider adding shellcheck linting for robustness: sudo apt install shellcheck then shellcheck process_guard.sh.  
+## 🛠️ **Troubleshooting**
+Check permissions if restarts fail  
+Use pgrep -af to inspect running processes  
+Run with verbose mode for debugging: bash -x process_guard.sh  
+Use shellcheck to improve script quality:  
+sudo apt install shellcheck
+shellcheck process_guard.sh
 
 **Contact**  
 Author: Safi Ahmed Shariff — [LinkedIn](https://www.linkedin.com/in/safi-ahmed-shariff-b03499264)
